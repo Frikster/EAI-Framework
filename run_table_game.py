@@ -136,7 +136,7 @@ if __name__ == "__main__":
     # agent config values
     llm_name_range = ["gpt-3.5-turbo-0125"] # "gpt-4-0125-preview"
     has_emotion_range = [True]
-    emotion_range = ["anger\\simple", "fear", "happiness", "sadness", "none"] #  "disgust", "surprise"
+    emotion_range = ["anger/simple", "fear", "happiness", "sadness", "none"] #  "disgust", "surprise"
     do_scratchpad_step_range = [True, False]
 
     # game config values

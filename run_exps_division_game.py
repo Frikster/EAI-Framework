@@ -184,7 +184,8 @@ args = parser.parse_args()
 
 if __name__ == "__main__":
 
-    cached_configs_1, cached_configs_2 = read_cached_configs()
+    # TODO: missing
+    # cached_configs_1, cached_configs_2 = read_cached_configs()
 
     game_dictator_configs = generate_game_configs("dictator")
     game_ultimatum_configs = generate_game_configs("ultimatum")
@@ -224,9 +225,9 @@ if __name__ == "__main__":
                     emotion_prompt_file_parts[1],
                     cur_agent_basic_config1['do_scratchpad_step']
                 )
-                if cur_config not in cached_configs_1:
-                    run_pipeline(game_basic_config, naming_config, cur_agent_basic_config1, cur_agent_basic_config2)
-                # run_pipeline(game_basic_config, naming_config, cur_agent_basic_config1, cur_agent_basic_config2)
+                # if cur_config not in cached_configs_1:
+                #     run_pipeline(game_basic_config, naming_config, cur_agent_basic_config1, cur_agent_basic_config2)
+                run_pipeline(game_basic_config, naming_config, cur_agent_basic_config1, cur_agent_basic_config2)
 
     # ----ultimatum----
 
@@ -259,8 +260,9 @@ if __name__ == "__main__":
                         predefined_agent_config['ratio']
                     )
                     all_configs_2.append(cur_config)
-                    if cur_config not in cached_configs_2:
-                        run_pipeline(game_basic_config, naming_config, predefined_agent_config, cur_agent_basic_config2)
+                    run_pipeline(game_basic_config, naming_config, predefined_agent_config, cur_agent_basic_config2)
+                    # if cur_config not in cached_configs_2:
+                    #     run_pipeline(game_basic_config, naming_config, predefined_agent_config, cur_agent_basic_config2)
     #
     # with open('testing/possible_configs_1.pkl', 'wb') as f:
     #     pickle.dump(all_configs_1, f)
