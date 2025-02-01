@@ -1,0 +1,5 @@
+The conversation for round {round} has ended. You had the following discussion:
+
+{conversation_summary}
+
+Keep this conversation in mind as you make your decision for this round. 

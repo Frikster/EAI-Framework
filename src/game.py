@@ -41,9 +41,69 @@ class RepeatedTableGame(TableGame):
             step, scratchpad_step = step, None
         return step, scratchpad_step
 
+    def _have_pre_decision_conversation(self, agent1, agent2, step_num, logger) -> None:
+        """Manages the pre-decision conversation between agents."""
+        try:
+            # Initialize conversation
+            message1 = agent1.start_conversation(step_num)
+            if not message1:
+                print(f"Agent 1 failed to start conversation in round {step_num}")
+                return
+
+            # Log messages using the TwoAgentLogger format
+            logger.log({
+                "conversation": {
+                    "agent1": message1,
+                    "agent2": ""
+                }
+            })
+            
+            message2 = agent2.respond_to_message(message1, step_num)
+            if message2:
+                logger.log({
+                    "conversation": {
+                        "agent1": "",
+                        "agent2": message2
+                    }
+                })
+            
+            # Continue conversation until one agent ends it or max turns reached
+            while message2:
+                message1 = agent1.respond_to_message(message2, step_num)
+                if not message1:
+                    break
+                    
+                logger.log({
+                    "conversation": {
+                        "agent1": message1,
+                        "agent2": ""
+                    }
+                })
+                
+                message2 = agent2.respond_to_message(message1, step_num)
+                if message2:
+                    logger.log({
+                        "conversation": {
+                            "agent1": "",
+                            "agent2": message2
+                        }
+                    })
+            
+            # End conversation for both agents
+            agent1.end_conversation()
+            agent2.end_conversation()
+            
+        except Exception as e:
+            print(f"Error during conversation in round {step_num}: {str(e)}")
+            agent1.end_conversation()
+            agent2.end_conversation()
+
     def _run_step(self, agent1, agent2, step_num, logger):
+        # Have pre-decision conversation
+        self._have_pre_decision_conversation(agent1, agent2, step_num, logger)
+        
         # make current step
-        step1, scratchpad_step1 = self.check_for_scatchpad(agent1.make_step(step_num)) 
+        step1, scratchpad_step1 = self.check_for_scatchpad(agent1.make_step(step_num))
         step2, scratchpad_step2 = self.check_for_scatchpad(agent2.make_step(step_num))
         try:
             reward1, reward2 = self.moves_to_rewards[step1 + step2]
@@ -111,7 +171,16 @@ class RepeatedTableGame(TableGame):
             outer_emotion=additional_args2["outer_emotion"],
             outer_opponent_emotion=additional_args1["opponent_outer_emotion"],
         )
-        # print(step1, step2)
-        # print(f"agent1: {memory_update1}")
-        # print(f"agent2: {memory_update2}")
+        print(step1, step2)
+        print(f"agent1: {memory_update1}")
+        print(f"agent2: {memory_update2}")
         logger.log({"memory": {"agent1": memory_update1, "agent2": memory_update2}})
+        print(f"agent1: {agent1.get_current_conversation_summary()}")
+        print(f"agent2: {agent2.get_current_conversation_summary()}")
+        # Add conversation to logger
+        logger.log({
+            "conversation": {
+                "agent1": agent1.get_current_conversation_summary(),
+                "agent2": agent2.get_current_conversation_summary()
+            }
+        })

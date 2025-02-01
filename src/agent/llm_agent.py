@@ -1,10 +1,11 @@
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 # from langchain.chat_models import ChatOpenAI
 # from langchain import LLMChain, PromptTemplate
 
 from src.agent.agent import BasicAgent
 from src.utils import get_llm_response
+from src.agent.conversation import PreDecisionConversationMixin
 
 
 class LLMAgent(BasicAgent):
@@ -75,7 +76,7 @@ Explain your decision step by step, be very short and clear:
         if self.do_scratchpad_step:
             self._history.pop()
             self._history.pop()
-        # print(scratchpad_step)
+        print(scratchpad_step)
         return predicted_step, scratchpad_step
 
 
@@ -100,7 +101,7 @@ Explain your decision step by step, be very short and clear:
         return predicted_step.strip("., \n\t")
 
 
-class EmotionReflectionLLMAgent(LLMAgent):
+class EmotionReflectionLLMAgent(LLMAgent, PreDecisionConversationMixin):
     def __init__(
         self,
         llm_name,
@@ -114,9 +115,12 @@ class EmotionReflectionLLMAgent(LLMAgent):
         emotion_question_format=None,
         outer_emotion_update_format=None,
         outer_emotions_question_format=None,
-        outer_opponent_emotion_update_format=None
+        outer_opponent_emotion_update_format=None,
+        # New conversation parameters
+        max_conversation_turns: int = 3,
     ):
-        super().__init__(
+        LLMAgent.__init__(
+            self,
             llm_name=llm_name,
             game_description=game_description,
             has_emotion=has_emotion,
@@ -125,11 +129,30 @@ class EmotionReflectionLLMAgent(LLMAgent):
             round_question_format=round_question_format,
             do_scratchpad_step=do_scratchpad_step
         )
+        PreDecisionConversationMixin.__init__(
+            self,
+            max_turns=max_conversation_turns,
+        )
+        # Existing emotion-related initialization
         self._emotion_update_format = emotion_update_format
         self._inner_emotion_question_format = emotion_question_format
         self._outer_emotion_update_format = outer_emotion_update_format
         self._outer_emotion_question_format = outer_emotions_question_format
         self._outer_opponent_emotion_update_format = outer_opponent_emotion_update_format
+
+    def _get_prompt_from_template(self, template_name: str, **kwargs) -> str:
+        """Implementation of the abstract method from PreDecisionConversationMixin"""
+        template_path = f"prompts/english/agent/conversation/{template_name}"
+        with open(template_path, 'r') as f:
+            template = f.read()
+        return template.format(**kwargs)
+
+    def _get_llm_response(self, prompt: str) -> str:
+        """Implementation of the abstract method from PreDecisionConversationMixin"""
+        self._history.append({"role": "user", "content": prompt})
+        response = get_llm_response(self.llm_name, self._history)
+        self._history.pop()  # Remove the prompt to keep history clean
+        return response.strip()
 
     def _get_emotion_state(self, request_format):
         emoton_question = request_format  # self._emotion_question_format
@@ -156,14 +179,21 @@ class EmotionReflectionLLMAgent(LLMAgent):
         outer_emotion=None,
         outer_opponent_emotion=None,
     ):
+        # Get conversation summary if available
+        conversation_summary = self.get_current_conversation_summary()
+        
+        # Format base update
         current_update = self._memory_update_format.format(
             round=step_num,
             my_step=my_step,
             opponent_step=opponent_step,
             my_reward=my_reward,
             opponent_reward=opponent_reward,
-            currency=self.memory_update_addintional_keys['currency']
+            currency=self.memory_update_addintional_keys['currency'],
+            conversation_summary=conversation_summary if conversation_summary else "No pre-decision conversation occurred."
         )
+        
+        # Add emotion updates
         if inner_emotion is not None:
             current_update += self._emotion_update_format.format(emotion=inner_emotion)
         if outer_emotion is not None:
@@ -174,5 +204,6 @@ class EmotionReflectionLLMAgent(LLMAgent):
             current_update += self._outer_opponent_emotion_update_format.format(
                 emotion=outer_opponent_emotion
             )
+        
         self._add_to_history("user", current_update)
         return {"user": current_update}

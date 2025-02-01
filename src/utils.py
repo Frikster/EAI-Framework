@@ -110,7 +110,7 @@ class BasicLogger:
         game_name: str = None,
     ):
         keys = ["decisions", "memory", "decisions_scratchpad", "inner_emotions", "outer_emotions", "div_decisions",
-                "div_decisions_scratchpad"]
+                "div_decisions_scratchpad", "conversation"]
         # if (
         #     "inner_emotions" in agent1_config.keys()
         #     or "inner_emotions" in agent2_config.keys()
@@ -191,14 +191,14 @@ def print_emotion_evolution(emotion_buffer):
 
 
 def get_llm_response(model_name, messages):
-    # for x in messages:
-    #     print(x)
-    # print('----------------------------')
+    for x in messages:
+        print(x)
+    print('----------------------------')
     response = openai_client.chat.completions.create(
         model=model_name, messages=messages, temperature=0
     )
-    # print(response.choices[0].message.content)
-    # print('============================')
+    print(response.choices[0].message.content)
+    print('============================')
     return response.choices[0].message.content
 
 

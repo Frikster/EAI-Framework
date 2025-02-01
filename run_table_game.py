@@ -118,7 +118,7 @@ def run_game(game_config, naming_config, agent1_config, agent2_config, logger):
 
     game.run(agent1, agent2, logger)
 
-    # print(agent1.emotion_memory)
+    print(agent1.emotion_memory)
 
 parser = argparse.ArgumentParser(description='Run single experiment')
 parser.add_argument('--verbose', '-v', action='store_true', help="Enable verbose mode")
@@ -142,8 +142,8 @@ if __name__ == "__main__":
     # game config values
     game_name_range = ["prisoner_dilemma", "battle_of_sexes"] # , "unfair"
     n_steps_range = 10
-    need_check_emotions_range = [True, False]
-    need_demonstrate_emotions_range = [True, False]
+    need_check_emotions_range = [True]
+    need_demonstrate_emotions_range = [True]
     memorize_seen_emotions_range = [True] # , False
     memorize_demonstrated_emotions_range = [False] # True, 
 

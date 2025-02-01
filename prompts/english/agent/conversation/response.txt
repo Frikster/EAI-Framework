@@ -1,0 +1,5 @@
+The other player said: "{last_message}"
+
+Round {round} is still ongoing. You can continue the conversation or end it if you're ready to make your decision.
+
+How would you like to respond? Keep your response brief and focused on the game. 

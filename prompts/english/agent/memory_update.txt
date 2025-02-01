@@ -1,1 +1,8 @@
-In round {round}, you chose Option {my_step} and the other player chose Option {opponent_step}. Thus, you won {my_reward} {currency} and the other player won {opponent_reward} {currency}.
+In round {round}:
+
+Pre-decision conversation:
+{conversation_summary}
+
+Decisions and outcomes:
+You chose Option {my_step} and the other player chose Option {opponent_step}. 
+You won {my_reward} {currency} and the other player won {opponent_reward} {currency}.

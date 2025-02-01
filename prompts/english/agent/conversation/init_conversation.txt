@@ -1,0 +1,5 @@
+Round {round} is about to begin. You can have a brief conversation with the other player before making your decision. 
+
+Your goal is to build trust and understanding with the other player. You can discuss your intentions, past moves, or strategy.
+
+What would you like to say? Keep your response brief and focused on the game. 
